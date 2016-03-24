@@ -28,6 +28,20 @@ $(document).ready(function(){
     xScale.domain([d3.min(dataset,xVal)-1, d3.max(dataset,xVal)]);
     yScale.domain([d3.min(dataset,yVal)-.5, d3.max(dataset,yVal)+.5]);
     
+    var variance = function(d){
+      return d.variance
+    ;};
+    
+    var color = d3.scale.linear()
+      .range(["blue","white","red"])
+      .domain([d3.min(dataset,variance),
+               d3.mean(dataset,variance),
+               d3.max(dataset,variance)]);
+    
+    function getColor(d){
+      return color(d.variance);
+    }
+    
     var svg = d3.select("body")
       .append("svg")
       .attr("width",w+margin.left+margin.right)
@@ -66,15 +80,17 @@ $(document).ready(function(){
       .attr("height",function(){return h/12})
       .attr("x",xMap)
       .attr("y",yMap)
-      .style("fill","blue")
+      .style("fill",getColor)
       .on("mouseover",function(d){
-        return tooltip.classed("hide",false)
+        tooltip.classed("hide",false)
           .style("left",d3.event.pageX+"px")
           .style("top",d3.event.pageY+"px")
           .text(months[d.month-1]+" - "+d.year+"\nTemp (C): "+(temp+d.variance).toPrecision(3));
+        d3.select(this).style("fill","orange");
       })
       .on("mouseout",function(){
-        return tooltip.classed("hide",true);
+        tooltip.classed("hide",true);
+        d3.select(this).style("fill",getColor);
       });
     
     
