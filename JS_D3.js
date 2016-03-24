@@ -1,26 +1,29 @@
 var url = "https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json";
 
-var margin = {top:10,right:10,bottom:50,left:50};
+var margin = {top:10,right:10,bottom:50,left:80};
 var w = 700-margin.left-margin.right;
 var h = 450-margin.top-margin.bottom;
 
 var xScale = d3.scale.linear().range([0,w]);
 var xVal = function(d){ return d.year;};
 var xMap = function(d){ return xScale(d.year);};
-var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+var xAxis = d3.svg.axis().scale(xScale)
+  .orient("bottom")
+  .tickFormat(d3.format("d"));
 
 var yScale = d3.scale.linear().range([h,0]);
 var yVal = function(d){ return d.month;};
 var yMap = function(d){ return yScale(d.month);};
-var yAxis = d3.svg.axis().scale(yScale).orient("left");
+var yAxis = d3.svg.axis().scale(yScale)
+  .orient("left");
 
 $(document).ready(function(){
   $.get(url, function(result){
     var data = JSON.parse(result);
     var dataset = data.monthlyVariance;
     
-    xScale.domain([d3.min(dataset,xVal), d3.max(dataset,xVal)]);
-    yScale.domain([d3.min(dataset,yVal), d3.max(dataset,yVal)]);
+    xScale.domain([d3.min(dataset,xVal)-1, d3.max(dataset,xVal)]);
+    yScale.domain([d3.min(dataset,yVal)-.5, d3.max(dataset,yVal)+.5]);
     
     var svg = d3.select("body")
       .append("svg")
