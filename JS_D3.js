@@ -1,7 +1,9 @@
 var url = "https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json";
 
-var margin = {top:10,right:10,bottom:50,left:80};
-var w = 700-margin.left-margin.right;
+var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+var margin = {top:10,right:10,bottom:40,left:40};
+var w = 800-margin.left-margin.right;
 var h = 450-margin.top-margin.bottom;
 
 var xScale = d3.scale.linear().range([0,w]);
@@ -13,7 +15,7 @@ var xAxis = d3.svg.axis().scale(xScale)
 
 var yScale = d3.scale.linear().range([h,0]);
 var yVal = function(d){ return d.month;};
-var yMap = function(d){ return yScale(d.month);};
+var yMap = function(d){ return yScale(d.month+0.6);};
 var yAxis = d3.svg.axis().scale(yScale)
   .orient("left");
 
@@ -21,6 +23,7 @@ $(document).ready(function(){
   $.get(url, function(result){
     var data = JSON.parse(result);
     var dataset = data.monthlyVariance;
+    var temp = data.baseTemperature;
     
     xScale.domain([d3.min(dataset,xVal)-1, d3.max(dataset,xVal)]);
     yScale.domain([d3.min(dataset,yVal)-.5, d3.max(dataset,yVal)+.5]);
@@ -53,5 +56,31 @@ $(document).ready(function(){
       .attr("x",h/2)
       .attr("y",40)
       .style("text-anchor","middle");
+    
+    var temps = svg.selectAll("rect")
+      .data(dataset)
+      .enter()
+      .append("rect")
+      .attr("class","temp")
+      .attr("width",function(){return w/(dataset.length/12)})
+      .attr("height",function(){return h/12})
+      .attr("x",xMap)
+      .attr("y",yMap)
+      .style("fill","blue")
+      .on("mouseover",function(d){
+        return tooltip.classed("hide",false)
+          .style("left",d3.event.pageX+"px")
+          .style("top",d3.event.pageY+"px")
+          .text(months[d.month-1]+" - "+d.year+"\nTemp (C): "+(temp+d.variance).toPrecision(3));
+      })
+      .on("mouseout",function(){
+        return tooltip.classed("hide",true);
+      });
+    
+    
   });
 });
+
+var tooltip = d3.select("body")
+  .append("div")
+  .attr("class","tip hide");
